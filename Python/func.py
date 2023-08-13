@@ -4,11 +4,8 @@ import os
 import json
 
 
-
-
 def main() -> None:
     clean()
-    fill_notes()
 
     args = sys.argv
 
@@ -105,23 +102,27 @@ def fill_notes():
         notes_str_list = file.read().split('\n')
         notes_list = list()
         for note in notes_str_list:
-            if not note.startswith('[') or not note.startswith(']'):
-                title = note.split(';')[0]
-                msg = note.split(';')[1]
-                creating_date = note.split(';')[2]
-                if len(note.split(';')) == 4:
-                    updating_date = note.split(';')[3]
-                    temp = N.parse_note(title.removeprefix('Title: '), 
-                                        msg.removeprefix('Message: '), 
-                                        creating_date.removeprefix('Creating date: '), 
-                                        updating_date.removeprefix('Updating date: '))
-                else:
-                    temp = N.parse_note(title.removeprefix('Title: '), 
-                                        msg.removeprefix('Message: '), 
-                                        creating_date.removeprefix('Creating date: '))
-                notes_list.append(temp)
-                    
 
+            if (not note.startswith('[') and not note.startswith(']')):
+                note_list = note.split('; ')
+                title = note_list[0]
+                msg = note_list[1]
+                creating_date = note_list[2]
+                if len(note_list) == 4:
+                    updating_date = note_list[3]
+                    temp = N(title.removeprefix('"Title: '),
+                             msg.removeprefix('Message: '))
+                    temp.parse_note(creating_date.removeprefix('Creating date: ').replace('"', ''),
+                                    updating_date.removeprefix('Updating date: ').replace('"', ''))
+                else:
+                    temp = N(title.removeprefix('"Title: '),
+                             msg.removeprefix('Message: '))
+                    temp.parse_note(creating_date.removeprefix('Creating date: ').replace('"', ''),
+                                    creating_date.removeprefix('Creating date: ').replace('"', ''))
+                notes_list.append(temp)
+        return notes_list
+    else:
+        return list()
 
 
 def add() -> None:
@@ -228,10 +229,15 @@ def delete(index) -> None:
 
 def save() -> None:
     file_str = 'notes.json'
-    json_notes = json.dumps([note.__str__() for note in notes])
+    json_notes = json.dumps([note.__str__()
+                            for note in notes], indent=0, separators=['', ''])
+    if json_notes != '[]':
+        file = open(file_str, 'w')
+        file.write(json_notes)
+        file.close()
+    else:
+        if os.path.exists(file_str):
+            os.remove(file_str)
 
-    file = open(file_str, 'w')
-    file.write(json_notes)
-    file.close()
 
 notes = fill_notes()

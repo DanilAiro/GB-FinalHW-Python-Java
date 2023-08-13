@@ -13,9 +13,7 @@ class Note(object):
         else:
           return 'Title: {}; Message: {}; Creating date: {}'.format(self.__title, self.__msg, self.get_create_date())
         
-    def parse_note(self, title, msg, date_str, upd_date_str):
-        self.__title = title
-        self.__msg = msg
+    def parse_note(self, date_str, upd_date_str):
         self.__create_date = date.strptime(date_str, '%d/%m/%Y, %H:%M:%S')
         self.__update_date = date.strptime(upd_date_str, '%d/%m/%Y, %H:%M:%S')
 
