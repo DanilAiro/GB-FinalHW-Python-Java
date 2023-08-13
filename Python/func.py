@@ -1,12 +1,14 @@
 from Note import Note as N
 import sys
 import os
+import json
 
-notes = list()
+
 
 
 def main() -> None:
     clean()
+    fill_notes()
 
     args = sys.argv
 
@@ -47,6 +49,7 @@ def start_program() -> None:
                         print('Нет заметок\n')
                 case 3:
                     isActive = False
+                    save()
                 case _:
                     print('Команда не распознана\n')
         else:
@@ -92,6 +95,33 @@ def clean():
         _ = os.system('cls')
     else:
         _ = os.system('clear')
+
+
+# нужно распарсить json
+def fill_notes():
+    file_str = 'notes.json'
+    if os.path.exists(file_str):
+        file = open(file_str, 'r')
+        notes_str_list = file.read().split('\n')
+        notes_list = list()
+        for note in notes_str_list:
+            if not note.startswith('[') or not note.startswith(']'):
+                title = note.split(';')[0]
+                msg = note.split(';')[1]
+                creating_date = note.split(';')[2]
+                if len(note.split(';')) == 4:
+                    updating_date = note.split(';')[3]
+                    temp = N.parse_note(title.removeprefix('Title: '), 
+                                        msg.removeprefix('Message: '), 
+                                        creating_date.removeprefix('Creating date: '), 
+                                        updating_date.removeprefix('Updating date: '))
+                else:
+                    temp = N.parse_note(title.removeprefix('Title: '), 
+                                        msg.removeprefix('Message: '), 
+                                        creating_date.removeprefix('Creating date: '))
+                notes_list.append(temp)
+                    
+
 
 
 def add() -> None:
@@ -197,4 +227,11 @@ def delete(index) -> None:
 
 
 def save() -> None:
-    return 0
+    file_str = 'notes.json'
+    json_notes = json.dumps([note.__str__() for note in notes])
+
+    file = open(file_str, 'w')
+    file.write(json_notes)
+    file.close()
+
+notes = fill_notes()
