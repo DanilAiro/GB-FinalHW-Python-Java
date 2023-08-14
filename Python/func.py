@@ -12,15 +12,19 @@ def main() -> None:
     if len(args) == 1:
         start_program()
     else:
-        # if len(sys.argv) < 6:
-        #     print('Ошибка. Слишком мало параметров.')
-        #     sys.exit(1)
+        if len(sys.argv) < 3:
+            print('Ошибка. Слишком мало параметров.')
+            sys.exit(1)
+
+        if len(sys.argv) == 4 or len(sys.argv) == 5:
+            print('Ошибка. Неправильное количество параметров.')
+            sys.exit(1)
 
         if len(sys.argv) > 6:
             print('Ошибка. Слишком много параметров.')
             sys.exit(1)
 
-        if len(args) == 3 or len(args) == 4 or len(args) == 6:
+        if len(args) == 3 or len(args) == 6:
             start_program_with_args(args)
 
 
@@ -53,7 +57,6 @@ def start_program() -> None:
             print(f'{command_str} не является числом\n')
 
 
-# добавить методы для разных задачь: удалить, обновить, показать. По названию и по номеру
 def start_program_with_args(args) -> None:
     match args[1]:
         case 'add':
@@ -75,27 +78,28 @@ def start_program_with_args(args) -> None:
                 else:
                     print('Нет такой заметки\n')
         case 'show':
-            pass
-        case 'update':  # добавить редактирование названия или тела
-            if args[2] == '--old' and args[4] == '--new':
-                auto_add(args[3], args[5])
-            elif args[2] == '--new' and args[4] == '--old':
-                auto_add(args[5], args[3])
+            if args[2].isdigit():
+                show_note(int(args[2]) - 1)
             else:
-                print('Аргументы указаны неверно, повторите')
+                for note in notes:
+                    if note.get_title() == args[2]:
+                        show_note(notes.index(note))
+                        break
+                else:
+                    print('Нет такой заметки\n')
         case _:
             print('Команда указана неверно, повторите')
+    save()
 
 
-def clean():
+def clean() -> None:
     if os.name == 'nt':
         _ = os.system('cls')
     else:
         _ = os.system('clear')
 
 
-# нужно распарсить json
-def fill_notes():
+def fill_notes() -> list:
     file_str = 'notes.json'
     if os.path.exists(file_str):
         file = open(file_str, 'r')
@@ -132,7 +136,7 @@ def add() -> None:
     print('Заметка успешно создана!\n')
 
 
-def auto_add(title, msg) -> None:
+def auto_add(title: str, msg: str) -> None:
     note = N(title, msg)
     notes.append(note)
     print('Заметка успешно создана!\n')
@@ -144,7 +148,7 @@ def show_list() -> None:
     print()
 
 
-def notes_menu():
+def notes_menu() -> None:
     print('1. Показать заметку\n' +
           '2. Назад\n')
     command_str = input('Введите команду: ')
@@ -162,19 +166,16 @@ def notes_menu():
         print(f'{command_str} не является числом\n')
 
 
-def show_note(index_str) -> None:
-    if index_str.isdigit():
-        index = int(index_str)
-        if index <= len(notes):
-            print(notes[index - 1].__str__() + '\n')
-            note_menu(index - 1)
-        else:
-            print('Нет такой заметки\n')
+def show_note(index_str: int) -> None:
+    index = int(index_str)
+    if index < len(notes) and index >= 0:
+        print(notes[index].__str__() + '\n')
+        note_menu(index)
     else:
-        print(f'{index_str} не является числом\n')
+        print('Нет такой заметки\n')
 
 
-def note_menu(index):
+def note_menu(index: int) -> None:
     print('1. Редактировать заметку\n' +
           '2. Удалить заметку\n' +
           '3. Назад\n')
@@ -199,7 +200,7 @@ def note_menu(index):
         print(f'{command_str} не является числом\n')
 
 
-def edit(index) -> None:
+def edit(index: int) -> None:
     print('1. Редактировать название\n' +
           '2. Редактировать тело\n' +
           '3. Назад\n')
@@ -222,9 +223,12 @@ def edit(index) -> None:
         print(f'{command_str} не является числом\n')
 
 
-def delete(index) -> None:
-    notes.pop(index)
-    print('Заметка успешно удалена\n')
+def delete(index: int) -> None:
+    if len(notes) > index and index >= 0:
+        notes.pop(index)
+        print('Заметка успешно удалена\n')
+    else:
+        print('Нет такой заметки')
 
 
 def save() -> None:
