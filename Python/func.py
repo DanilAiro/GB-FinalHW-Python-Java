@@ -6,6 +6,7 @@ import json
 
 def main() -> None:
     clean()
+    print(notes)
 
     args = sys.argv
 
@@ -106,8 +107,8 @@ def fill_notes() -> list:
         notes_str_list = file.read().split('\n')
         notes_list = list()
         for note in notes_str_list:
-
             if (not note.startswith('[') and not note.startswith(']')):
+                print(1)
                 note_list = note.split('; ')
                 title = note_list[0]
                 msg = note_list[1]
@@ -167,7 +168,7 @@ def notes_menu() -> None:
 
 
 def show_note(index_str: int) -> None:
-    index = int(index_str)
+    index = int(index_str) - 1
     if index < len(notes) and index >= 0:
         print(notes[index].__str__() + '\n')
         note_menu(index)
